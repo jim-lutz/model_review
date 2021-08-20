@@ -24,21 +24,36 @@
 %   * TPR valve is present and not insulated;
 %   * thermostat pocket has an effective diameter of 35 mm;
 %   * temperature rise above ambient is 55 K;
-%   * cylinder exterior walls are held at a constant temperature of 20°C;
+%   * cylinder exterior walls are held at a constant temperature of 20?C;
 %   * cylinder insulation is polyurethane with a bulk thermal conductivity of
 %     0.025 W.m-1.K-1.
 
 clear; close; clc
+  # not sure what this does, but didn't squawk
 pkg load statistics
+  # ran with no output
 pkg load optim
+  # ran with no output
 
 filename = 'cylinder_data_202021_Check_Testing.xlsx'
+  #{ 
+  this is the name of the input file. 
+  see also data_maps.ods for summary of data sets
+  this spreadsheet doesn't have test results in it?
+  #}
 %filename = 'cylinder_data.xlsx'
 filename_output = 'out.xlsx'
+  # name of results file
 
 [M_opt, T_data, R_data] = xlsread(filename);
+  #{  
+'xlsread' is a function from the file /home/jiml/snap/octave/78/octave/io-2.6.3/xlsread.m
 
-
+Return argument NUMARR (M_opt) contains the numeric data, optional return
+arguments TXTARR (T_data) and RAWARR (R_data) contain text strings and the raw
+spreadsheet cell data, respectively.
+  T_data has text in rows 1 & 2   
+  #}  
 % Get rid of the first three columns in the numerical data array.
 % They contain a serial counter and name and model information which is not
 % used for optimisation.
