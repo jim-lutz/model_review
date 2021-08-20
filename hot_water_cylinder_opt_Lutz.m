@@ -69,6 +69,7 @@ M_opt(:,1:3) = [];
 % Number of thermostat pockets,
 % Thermal conductivity of insulation (W.m-1.K-1),
 % Standard (4692 means AS/NZS 4692, 4606 means NZS 4602)
+  # seems to have done that
 
 % Some physical constants used in the modelling.
 % The quantities in which watts appear in the SI units
@@ -76,9 +77,32 @@ M_opt(:,1:3) = [];
 %
 stefan_boltzmann = 5.670374419e-8 * 0.024
 emissivity = 0.05
+  #{
+  This doesn't look right!!
+    from ASHRAE Fundamentals, 
+    CHAPTER 4. HEAT TRANSFER
+    3. THERMAL RADIATION
+    Table 5 Emissivities and Absorptivities of Some Surfaces
+    Emissivity of white paint is 0.90 - 0.85  
+  from report 'Optimisation and Statistical Estimation of Hot water cylinder Losses According to ASNZS 4234 Appendix E'  
+    "Õ is the surface emissivity (dimensionless, 
+    assumed to be 0.4 for metal hot water cylinder exteriors)."
+  #}
 k_wood = 0.130 * 0.024
 k_air  = 0.024 * 0.024
-
+  #{
+  from ASHRAE Fundamentals, CHAPTER 33. Physical PROPERTIES OF MATERIALS
+  Table 3 Properties of Solids
+  Thermal Conductivity, W/(m-K)
+    Softwoods 0.11/0.16
+    0.130 looks plausible 
+  Table 1 Properties of Vapor
+  Thermal Conductivity, W/(m-K)
+    Nitrogen    0.0240
+    Oxygen      0.0244
+    Water vapor 0.0247
+    0.024 looks fine
+  #}
 % The temperature rise and thermal conductivity. The thermal conductivities are
 % taken from the model losses in Appendix E. The multiplication by 0.024 is to
 % convert W (watts) into kWh.day-1 so the thermal conductivity becomes in units
@@ -86,20 +110,39 @@ k_air  = 0.024 * 0.024
 dT_4692 = 55;
 dT_4606 = 55.6;
 k_per_fitting = (5 * 0.0269) / 55;
+  # pipe diameter = 0.0269 = 1.059 inches
+  # assumed insulated, OK?
 k_per_TPR = 0.12 / 55;
+  # 0.12 = d_pipe * 5 ?
+  # d_pipe = 0.024 = 0.945 inches, Probably OK
 h_thermopocket = 27 * (pi * 0.035^2 / 4) / 55;
+  # 0.035 m = 1.38 inches radius?
 T_amb = 20;
-
+  #{
+    from 4234, Table E.9 ? Heat loss through tank fitttings 
+        Tank opening (e.g. themostat pocket)            A_o * 27
+          A_o denotes the area of the opening in the insulation 
+          in square metres (e.g. for a thermostat opening).
+        Upinsulated pipe gr fitting (e.g PTR valve)     d_pipe * 5
+        Insulated pipe or fitting                       d_pipe * 3.5
+  #}
+#
 % Volume ratio. Assume target volume is actually a multiple of the volume.
 % This is based on the provision AS/NZS 4692 that the volume must be from 1
 % to 1.05 times the contained volume.
 V_ratio_base = 1;
-
-
+  #{
+    This is  from 4692.1, 5.2.2 Nominal capacity?New Zealand
+    In standard this is the allowed ratio of measured to nominal volume
+    to keep mfrs from claiming more volume than they provide
+  #}
 % Get MEPS level for every cylinder from Table A5 of AS/NZS 4692.1. This MEPS
 % level does not include the TPR valve allowance. The offset is added as
 % required.
 Q_MEPS_4692 = Q_MEPS_4692_Table_A5(M_opt(:,1)) + (M_opt(:,5) > 0) * 0.12;
+  # M_opt(:,1) is Capacity (m3)
+  # M_opt(:,5) is number of TPR Valves
+  # Q_MEPS_4692_Table_A5() is in Q_MEPS_4692_Table_A5.m
 Q_MEPS_4606 = Q_MEPS_4606_Table_1(M_opt(:,1));
 Q_MEPS = Q_MEPS_4692;
 Q_MEPS(M_opt(:, 10) == 4606) = Q_MEPS_4606(M_opt(:, 10) == 4606);
