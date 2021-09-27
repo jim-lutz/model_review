@@ -6,9 +6,9 @@ bibliography: ExtTempCalc.bib # build this collection in Zotero and save in this
 
 This notebook is documentation of a simple model of the heat transfer from the water in the tank to the test chamber under AS/NZS 4692.1. @joint_technical_committee_el-20___electric_water_heating_appliances_electric_2005
   
-The heat transfer is conductive from the water through the insulation to the surface per Appendix E of AS/NZS 4692.1. Assume the surface temperature is constant and the same on all surfaces. Then from the top and side use a combination of radiative and convective heat transfer to ambient. The convective heat loss is both free and forced. Heat transfer from the bottom is modeled as conductive from the surface into a platform of wood of 25 mm thickness above a 325 mm air gap above the floor. The heat transfer across the air gap is conductive down through air and radiative to the floor. Assume all surfaces in the test chamber are at the ambient temperatures.
+The heat transfer is conductive from the water through the insulation to the surface per Appendix E of AS/NZS 4692.1. Assume the surface temperature is constant and the same on all surfaces. Then from the top and side use a combination of radiative and convective heat transfer to ambient. The convective heat loss is both free and forced.c The heat transfer across the air gap is conductive down through air and radiative to the floor. Assume all surfaces in the test chamber are at the ambient temperatures.
   
-Assume the water in the tank is perfectly mixed and at a constant temperature. Neglect the thermal resistance of the metal wall of the tank and the surface.
+Assume the water in the tank is perfectly mixed and at a constant temperature. Neglect the thermal resistance of the metal wall of the tank and at the surface of the insulation.
 
 ```{r}
 Tamb   = 20  # °C
@@ -129,5 +129,72 @@ Qsurf = 2 * pi * k * (Twater - Tsurf) *
 So with the assumed surface temperature, the total conductive heat loss through the insulation is `r round(Qsurf,1)` (W) or `r round(Qsurf*(24/1000),3)` (kWh/day)
 
 Which as a check should be the sum of the Qside and Qends or `r round(Qside + Qends,1)` or `r round((Qside + Qends)*24/1000,3)` (kWh/day)
+
+# Heat Loss from Surface to Ambient #
+
+The heat losses from the surface of the water heater will a combination of convective, radiative and for the base further conduction. 
+
+Losses from the side surfaces are modeled as convective to the ambient air and radiative to the surfaces of the test chamber. The convective losses will be modeled as a combination of free and forced convection from a heated vertical surface...
+
+Losses from the top are modeled as free convection upward from a heated disk and also radiative.
+
+Loss from the bottom is modeled as conductive through a wooden platform and then radiative to the test chamber surfaces and downward convection through the air below the platform.
+
+
+Convective heat transfer is often calculated by determining a Nusselt number (Nu) for the conditions being investigated. Nu is the ratio of convective to conductive heat transfer at a boundary with a fluid. The conductive component is measured under the same conditions but for a hypothetically motionless fluid. So Nu = hLc/k, where Lc is a characteristic length. Solving for h, the convective heat transfer coefficient, then allows the heat loss to be calculated. 
+
+Nusselt numbers are usually obtained from correlations of experimental data. The correlations to determined Nu are written in terms of Prandtl numbers and Rayleigh numbers. In the case of force convection the Reynolds number is used instead of the Rayleigh number.
+
+The Rayleigh number (Ra) for a fluid is a dimensionless number associated with buoyancy-driven flow, also known as free or natural convection. It characterises the fluid's flow regime: a value in a lower range denotes laminar flow; a value in a higher range, turbulent flow. Below a critical value, there is no fluid motion and heat transfer is by conduction rather than convection. The Rayleigh number is defined as the product of the Grashof number and the Prandtl number.
+
+The Grashof number (Gr) is a dimensionless number in fluid dynamics and heat transfer which approximates the ratio of the buoyancy to viscous force acting on a fluid. It frequently arises in the study of situations involving natural convection and is analogous to the Reynolds number.
+
+The Prandtl number (Pr) is a dimensionless number defined as the ratio of momentum diffusivity to thermal diffusivity.
+
+The Grashof number is calculated as 
+
+$$
+Gr_L = \frac{g \beta (T_s-T_{\infty}) L^3}
+          {\nu^2}
+
+$$
+where 
+```{r}
+g = 9.81 # acceleration due to Earth's gravity (m/s^2)
+beta = 3.43e-3 # the coefficient of thermal expansion of air at 20°C (1/K)
+Ts = 25 # the surface temperature (°C ), using initial estimate here
+Tamb  = 20 # the bulk temperature (°C)
+L = height # the vertical length (m), 
+vis_k = 15.28e-6 # the kinematic viscosity (m2/s), using air at 22.5°C
+
+```
+
+```{r}
+# this is a function to calculate the Grashof number
+# defaults to the previous values
+# explicitly define if using different values
+Gr <- function(
+  Ts = Ts,
+  Tamb = Tamb,
+  L = L,
+  vis_k = vis_k,
+  beta = beta,
+  g = g
+) 
+{
+  Gr = g * beta * (Ts - Tamb) * L ^ 3 / vis_k^3
+}
+
+  
+```
+
+
+
+## Heat Loss from Side Surface to Ambient #
+
+
+
+
+
 
 # References
