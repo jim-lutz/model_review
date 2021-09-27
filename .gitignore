@@ -8,3 +8,5 @@
 
 
 .Rhistory
+
+.Rdata  # so far everything is small enough to rerun each time.
