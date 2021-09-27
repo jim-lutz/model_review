@@ -36,22 +36,98 @@ Use heat transfer equations from Chapter 4, Heat Transfer, ASHRAE Fundamentals. 
 
 The simple idealized tank model in 4234 Appendix E consists only of losses through the insulation on the sides and at the ends of the tank. There are no losses through the corners. Thus the insulation can be modeled as a hollow cylinder and to circular disks.
 
+To check the equations at this stage assume the surface temperature of the insulation is 25 °C 
+
+```{r}
+Tsurf = 25 # °C 
+```
+
+
+### Conductive heat loss through side #
+
 For the hollow cylinder the equation is written as,
 $$Q_{side} = \frac{2 \pi k h}{ln(\frac{d_o}{d_i})} {\Delta T } $$
 Or rewritten to account for the thicknesses of insulation,
 $$Q_{side} = \frac{2 \pi k (height- 2 dx_{ends} )}
 {ln(\frac{diam}{(diam-(2dx_{side}))})}{(T_{water} - T_{surf})) } $$
 
-To initialize calculations assume the insulation surface temperature is 25 °C 
 
 ```{r}
-Tsurf = 25 # °C 
 Qside = ( 2 * pi * k * (height - 2 * dx_ends) ) / 
         ( log(diam/(diam-(2*dx_side)) ) ) *
           (Twater - Tsurf)
 
 ```
-So with the assumed surface temperature, the heat loss through the side insulation is `r round(Qside,1)` (W)
+So with the assumed surface temperature, the heat loss through the side insulation is `r round(Qside,1)` (W) or in kWh/day `r round(Qside*(24/1000),3)`
 
+### Conductive heat loss through ends #
+
+The conductive loss from both ends is
+
+$$
+Q_{cond,ends} = \frac{2 \pi k ( (r_i)^2 (\Delta T) )}
+{dx_{ends}}
+$$
+Which can be rewritten as 
+
+$$
+Q_{cond,ends} = \frac{2 \pi k  (\frac{diam- 2 dx_{ends}}{2})^2 (T_{water} - T_{surf}) }
+{dx_{ends}}
+$$
+and then simplified as 
+
+$$
+Q_{cond,ends} = \frac{ \pi k  ({diam- 2 dx_{ends}})^2 (T_{water} - T_{surf}) }
+{2dx_{ends}}
+$$
+
+```{r}
+Qends = ( pi * k * (diam - 2 * dx_ends)^2  * (Twater - Tsurf) )/ 
+        ( 2*dx_ends) 
+
+```
+
+So with the assumed surface temperature, the conductive heat loss through the insulation at the ends is `r round(Qends,1)` (W) or `r round(Qends*(24/1000),3)` (kWh/day)
+
+
+
+### Conductive heat loss to surface #
+
+So the total conductive losses to the surface are 
+
+$$
+Q_{surf} =  \frac{2 \pi k (height- 2 dx_{ends} )}
+{ln(\frac{diam}{(diam-(2dx_{side}))})}{(T_{water} - T_{surf})) }
++ 
+\frac{ \pi k  ({diam- 2 dx_{ends}})^2 (T_{water} - T_{surf}) }
+{2dx_{ends}} 
+$$
+or with some simplification,
+
+$$
+Q_{surf} = 2 \pi k (T_{water} - T_{surf}) (
+           \frac{ (height- 2 dx_{ends} )}
+                {ln(\frac{diam}{(diam-(2dx_{side}))})} 
++ 
+\frac{ ({diam- 2 dx_{ends}})^2 }
+    {4dx_{ends}} 
+)
+$$
+
+So the total conductive heat loss to the surface is
+
+```{r}
+Qsurf = 2 * pi * k * (Twater - Tsurf) * 
+  (
+    (height - 2 * dx_ends) / log(diam/(diam-2*dx_side))
+                               +
+    ( (diam - 2 * dx_ends)^2 ) / ( 4*dx_ends) 
+  )
+
+```
+
+So with the assumed surface temperature, the total conductive heat loss through the insulation is `r round(Qsurf,1)` (W) or `r round(Qsurf*(24/1000),3)` (kWh/day)
+
+Which as a check should be the sum of the Qside and Qends or `r round(Qside + Qends,1)` or `r round((Qside + Qends)*24/1000,3)` (kWh/day)
 
 # References
