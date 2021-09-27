@@ -1,0 +1,34 @@
+---
+title: "Exterior Temperature Calculations"
+output: html_notebook
+bibliography: ExtTempCalc.bib # build this collection in Zotero and save in this directory
+---
+
+This notebook is documentation of a simple model of the heat transfer from the water in the tank to the test chamber under AS/NZS 4692.1. @joint_technical_committee_el-20___electric_water_heating_appliances_electric_2005
+  
+The heat transfer is conductive from the water through the insulation to the surface per Appendix E of AS/NZS 4692.1. Assume the surface temperature is constant and the same on all surfaces. Then from the top and side use a combination of radiative and convective heat transfer to ambient. The convective heat loss is both free and forced. Heat transfer from the bottom is modeled as conductive from the surface into a platform of wood of 25 mm thickness above a 325 mm air gap above the floor. The heat transfer across the air gap is conductive down through air and radiative to the floor. Assume all surfaces in the test chamber are at the ambient temperatures.
+  
+Assume the water in the tank is perfectly mixed and at a constant temperature. Neglect the thermal resistance of the metal wall of the tank and the surface.
+
+```{r}
+Tamb = 20  # °C
+Twater = 75 # °C
+Vair = 0.25 # air speed within range of 0.25 m/s and 0.5 m/s
+```
+
+The water heater and information about it are from the Predictive Modeling Tool (PMT)  @bart_milne_optimisation_2021 
+
+This example is based on the Rinnai MS1805503 0 model tested to 4692. For volumes, dimensions, and insulation thicknesses see Table 7: Hot water cylinder model, MEPS and measurement information. 
+
+```{r}
+vol       =	0.18 # m^3	
+diam      =	0.55 # m
+height		= 1.295 # m
+dx_side		= 0.053 # m side insulation thickness
+dx_ends		= 0.060 # m top and bottom insulation thickness
+
+```
+
+Use heat transfer equations from Chapter 4, Heat Transfer, ASHRAE Fundamentals. @technical_committee_13_heat_transfer_and_fluid_flow_chapter_2017
+
+# References
