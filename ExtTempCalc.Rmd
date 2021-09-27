@@ -151,42 +151,72 @@ The Grashof number (Gr) is a dimensionless number in fluid dynamics and heat tra
 
 The Prandtl number (Pr) is a dimensionless number defined as the ratio of momentum diffusivity to thermal diffusivity.
 
+#### Grashof Number #
+
 The Grashof number is calculated as 
 
-$$
-Gr_L = \frac{g \beta (T_s-T_{\infty}) L^3}
-          {\nu^2}
+$$Gr_ = \frac{g \beta (T_s-T_{\infty}) L^3}{\nu^2}$$
 
-$$
-where 
+where;
 ```{r}
-g = 9.81 # acceleration due to Earth's gravity (m/s^2)
-beta = 3.43e-3 # the coefficient of thermal expansion of air at 20°C (1/K)
-Ts = 25 # the surface temperature (°C ), using initial estimate here
-Tamb  = 20 # the bulk temperature (°C)
-L = height # the vertical length (m), 
-vis_k = 15.28e-6 # the kinematic viscosity (m2/s), using air at 22.5°C
+g     = 9.81     # acceleration due to Earth's gravity (m/s^2)
+beta  = 3.43e-3  # the coefficient of thermal expansion of air at 20°C (1/K)
+Ts    = 25       # the surface temperature (°C ), using initial estimate here
+Tamb  = 20       # the bulk temperature (°C)
+L     = height   # the vertical length (m), 
+nu    = 15.28e-6 # the kinematic viscosity (m2/s), using air at 22.5°C
 
 ```
-
 ```{r}
 # this is a function to calculate the Grashof number
-# defaults to the previous values
+# defaults to the previous values are provided
 # explicitly define if using different values
 Gr <- function(
-  Ts = Ts,
-  Tamb = Tamb,
-  L = L,
-  vis_k = vis_k,
-  beta = beta,
-  g = g
+g     = 9.81,     # acceleration due to Earth's gravity (m/s^2)
+beta  = 3.43e-3,  # the coefficient of thermal expansion of air at 20°C (1/K)
+Ts    = 25,       # the surface temperature (°C ), using initial estimate here
+Tamb  = 20,       # the bulk temperature (°C)
+L     = 1.295,    # the vertical length (m), 
+nu    = 15.28e-6 # the kinematic viscosity (m2/s), using air at 22.5°C
 ) 
 {
-  Gr = g * beta * (Ts - Tamb) * L ^ 3 / vis_k^3
+  Gr = g * beta * (Ts - Tamb) * L ^ 3 / nu^3
+  return(Gr)
 }
 
-  
+
 ```
+With these values the Grashof number is `r sprintf("%7.4e ", Gr())`
+
+#### Prandtl number #
+
+The Prandtl number is calculated as 
+
+$$Gr_ = \frac{\nu}{\alpha}$$
+
+where;
+```{r}
+nu    = 15.28e-6  # the kinematic viscosity (m2/s), for air air at 22.5°C
+alpha = 22.045e-6 # the thermal diffusivity (m2/s) for air at 22.5°C)
+
+```
+
+```{r}
+# this is a function to calculate the Prandtl number
+# defaults to the previous values are provided
+# explicitly define if using different values
+Pr <- function(
+nu    = 15.28e-6,  # the kinematic viscosity (m2/s), using air at 22.5°C
+alpha = 22.045e-6 # the thermal diffusivity (m2/s) for air at 22.5°C)
+) 
+{
+  Pr =  nu / alpha
+  return(Pr)
+}
+```
+
+With these values the Prandtl number is `r sprintf("%7.4f ", Pr())`
+
 
 
 
