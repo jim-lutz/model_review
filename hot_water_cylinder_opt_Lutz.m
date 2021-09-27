@@ -85,7 +85,7 @@ emissivity = 0.05
     Table 5 Emissivities and Absorptivities of Some Surfaces
     Emissivity of white paint is 0.90 - 0.85  
   from report 'Optimisation and Statistical Estimation of Hot water cylinder Losses According to ASNZS 4234 Appendix E'  
-    "Õ is the surface emissivity (dimensionless, 
+    "ï¿½ is the surface emissivity (dimensionless, 
     assumed to be 0.4 for metal hot water cylinder exteriors)."
   #}
 k_wood = 0.130 * 0.024
@@ -144,7 +144,11 @@ Q_MEPS_4692 = Q_MEPS_4692_Table_A5(M_opt(:,1)) + (M_opt(:,5) > 0) * 0.12;
   # M_opt(:,5) is number of TPR Valves
   # Q_MEPS_4692_Table_A5() is in Q_MEPS_4692_Table_A5.m
 Q_MEPS_4606 = Q_MEPS_4606_Table_1(M_opt(:,1));
+  # the calculations in Table 1 and nearby equations are a rather strange
+  # way of doing MEPS, value in table if that volume, equation if not
+  # seems like this is implemented OK
 Q_MEPS = Q_MEPS_4692;
+  # looks like it matchs TABLE A5 from 4692.2
 Q_MEPS(M_opt(:, 10) == 4606) = Q_MEPS_4606(M_opt(:, 10) == 4606);
 
 
@@ -159,6 +163,7 @@ r_penalty_mult = 1
 r_penalty = 1 + (r_penalty_ - 1) * r_penalty_mult
 r95_penalty = 1 + 2 * (r_penalty_ - 1) * r_penalty_mult
 Q_sd_ratio = round(1e6 * ((r_penalty - 1) / z_target)) / 1e6;
+# haven't checked this, he's using 1.35 as a variable.
 
 % Iterate through the optimisation for every cylinder model (row in M_opt
 % matrix).
@@ -183,6 +188,7 @@ for ii=1:N
     % thickness optimisation guess.
     V_cyl_o = pi * (d_o^2 * h_o) / 4;
     tank_ratio = cbrt(V_cyl_i / V_cyl_o);
+    # Compute the real cube root of each element of X.
     
     % Use the tank volume ratio dimensions to provide initial estimates for the
     % optimum insulation thickness. Make sure the upper bound is never greater
@@ -196,9 +202,9 @@ for ii=1:N
     % losses to optimise. The second implements the constraint that the volume
     % of the inner tank must match the volume as designed.
     if (std_ == 4606)
-        dT = dT_4606;
+        dT = dT_4606; # 55.6
     else
-        dT = dT_4692;
+        dT = dT_4692; # 55
     end
     
     % Define the optimisation functions and equality constraint functions.
@@ -245,6 +251,12 @@ for ii=1:N
     % value, as it is assumed that the individual differences between the 
     % fittings are random.
     Q_fittings_var = Q_fittings_TOT_var(n_fittings, n_TPR, n_thermopocket, dT, k_per_fitting, k_per_TPR, h_thermopocket) * Q_sd_ratio;
+      # this function is from Q_fittings_TOT_var.m
+      # dT - Temperature rise of the hot water cylinder exterior to ambient (K).
+      # shouldn't this be from water temp to ambient???
+      # in 4342 E.9 Fittings heat loss, these are from water temp to ambient
+      # these are losses through these feed throughs. the thermal path
+      # is through the metal of the pipe, TPR, or reduced insulation around thermopocket
 
     % The total losses are the sum of the insulation losses (with penalty)
     % and the fittings losses.
@@ -391,6 +403,9 @@ for ii=1:N
     % value of dT.
     %
     dT_ext = lsqnonlin(T_ext_fcn_TOT, dT/2, 0, dT);
+      # Solve nonlinear least-squares (nonlinear data-fitting) 
+      # problems min [EuclidianNorm(f(x))] .^ 2 x
+      # part of optim package
     dT_ext_(ii,1) = dT_ext;
     
     dT_mod(ii,1) = dT - dT_ext;
