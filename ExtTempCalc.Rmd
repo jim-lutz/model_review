@@ -11,9 +11,10 @@ The heat transfer is conductive from the water through the insulation to the sur
 Assume the water in the tank is perfectly mixed and at a constant temperature. Neglect the thermal resistance of the metal wall of the tank and the surface.
 
 ```{r}
-Tamb = 20  # °C
-Twater = 75 # °C
-Vair = 0.25 # air speed within range of 0.25 m/s and 0.5 m/s
+Tamb   = 20  # °C
+Twater = 75  # °C
+Vair   = 0.25  # air speed within range of 0.25 m/s and 0.5 m/s
+k      = 0.025  # polyurethane W/m-K, from 4234 Appendix E
 ```
 
 The water heater and information about it are from the Predictive Modeling Tool (PMT)  @bart_milne_optimisation_2021 
@@ -30,5 +31,27 @@ dx_ends		= 0.060 # m top and bottom insulation thickness
 ```
 
 Use heat transfer equations from Chapter 4, Heat Transfer, ASHRAE Fundamentals. @technical_committee_13_heat_transfer_and_fluid_flow_chapter_2017
+
+## Conductive heat loss from water to surface #
+
+The simple idealized tank model in 4234 Appendix E consists only of losses through the insulation on the sides and at the ends of the tank. There are no losses through the corners. Thus the insulation can be modeled as a hollow cylinder and to circular disks.
+
+For the hollow cylinder the equation is written as,
+$$Q_{side} = \frac{2 \pi k h}{ln(\frac{d_o}{d_i})} {\Delta T } $$
+Or rewritten to account for the thicknesses of insulation,
+$$Q_{side} = \frac{2 \pi k (height- 2 dx_{ends} )}
+{ln(\frac{diam}{(diam-(2dx_{side}))})}{(T_{water} - T_{surf})) } $$
+
+To initialize calculations assume the insulation surface temperature is 25 °C 
+
+```{r}
+Tsurf = 25 # °C 
+Qside = ( 2 * pi * k * (height - 2 * dx_ends) ) / 
+        ( log(diam/(diam-(2*dx_side)) ) ) *
+          (Twater - Tsurf)
+
+```
+So with the assumed surface temperature, the heat loss through the side insulation is `r round(Qside,1)` (W)
+
 
 # References
