@@ -9,4 +9,5 @@
 
 .Rhistory
 
-.RData  # so far everything is small enough to rerun each time.
+# so far everything is small enough to rerun each time.
+.RData

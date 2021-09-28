@@ -218,23 +218,114 @@ alpha = 22.045e-6 # the thermal diffusivity (m2/s) for air at 22.5°C)
   return(Pr)
 }
 ```
-
-With these values the Prandtl number is `r sprintf("%7.4f ", Pr())`
+```{r}
+# Calculate the current value of Pr
+Pr <- Pr()
+```
+With these values the Prandtl number is `r sprintf("%7.4f ", Pr)`
 
 
 #### Rayleigh number #
 
-The Rayleigh number is calculated as ${Gr}{Pr}$. In these conditions the Rayleigh number is `r sprintf("%5.4e",Gr()*Pr())`
+The Rayleigh number is calculated as ${Gr}{Pr}$. 
+
+```{r}
+# this is a function to calculate the Rayleigh number
+Ra <- function(
+  Gr,  # Grashof number
+  Pr  # Prandtl number
+  ) 
+{
+  Ra = Gr * Pr
+  return(Ra)
+}
+```
+```{r}
+# Calculate the current value of Ra
+Ra <- Ra(Gr(),Pr)
+```
+
+In these conditions the Rayleigh number is `r sprintf("%5.4e",Ra)`
 
 
-## Heat Loss from Side Surface to Ambient #
+## Heat Loss from Tank Side Surface to Ambient #
 
-For this Rayleigh number and Prandtl number the Nusselt Number is calculated as @technical_committee_13_heat_transfer_and_fluid_flow_chapter_2017 
+For this Rayleigh number, the Nusselt Number for a vertical plate is calculated as @technical_committee_13_heat_transfer_and_fluid_flow_chapter_2017 
 $$
-Nu = \left\{{0.825 + \frac{0.387Ra^{\frac{1}{6}}}
-                { \left[ 1 + \left( \frac{0.437}{Pr} \right) ^ \frac{9}{16} \right] ^\frac{8}{27}}} \right\}^2
+Nu_{vert} = \left\{{0.825 + \frac{0.387Ra^{\frac{1}{6}}}
+                { \left[ 1 + \left( \frac{0.437}{Pr} \right) ^ \frac{9}{16} 
+                \right] ^\frac{8}{27}}} 
+                \right\}^2
 $$
 
+```{r}
+# this is a function to calculate the Nusselt number for a vertical plate
+# at constant temperature
+# from ASHRAE Handbook Fundamentals, 2017, Chapter 4 Heat Transfer
+# Table 9 Natural Convection Correlations
+Nu_vert <- function(
+  Ra,  # Rayleigh number
+  Pr   # Prandtl number
+  ) 
+{
+  if (Ra < 10^9) {
+    Nu_vert = 0.68 + 
+                (0.67 * Ra^(1/4)) /
+                ( 1 + (0.492/Pr)^(9/16)  )^(4/9)
+      
+  } else {
+    if (Ra < 10^12) {
+    Nu_vert = (0.825 + 
+                (0.387 * Ra^(1/6)) /
+                ( 1 + (0.437/Pr)^(9/16)  )^(8/27)
+              )^2
+    } else {
+            Nu_vert = NA
+          }
+  }
+  
+  return(Nu_vert)
+  
+}
+```
+
+```{r}
+Nu_vert <- Nu_vert(Ra,Pr)
+```
+
+For these conditions the Nusselt number of the natural convective off the side of the tank is `r sprintf("%5.2f",Nu_vert)`
+
+To apply the Nusselt number requires the thermal conductivity of air
+
+```{r}
+k_air  = 26.06e-3 #  W/m-K thermal conductivity of air at 22.5 °C      
+```
+
+
+```{r}
+# calculate the heat transfer coefficient in W/m^2-K
+h_side <- Nu_vert * k / L
+
+```
+
+So the convective heat transfer coefficient from the side of the tank is `r sprintf("%5.2f",h_side)` W/m^2-k 
+
+The natural convective heat transfer from the side of the tank is
+$$
+Q_{side.conv} = h_{side} ( diam  \times \pi \times height)  (T_{surf}-T_{amb})
+$$
+```{r}
+ Qside.conv <- h_side * diam * pi * height * (Tsurf - Tamb)
+```
+
+So the natural convective heat loss from the side of the tank is
+`r sprintf("%5.3f",Qside.conv)` W or `r sprintf("%5.3f",Qside.conv*24/1000)` kWh/day
+`
+```{r}
+Qside 
+Qside.conv
+```
+Qside > Qside.conv so have to raise Tsurf until they are equal.
 
 
 
