@@ -4,90 +4,114 @@ output: html_notebook
 bibliography: ExtTempCalc.bib # build this collection in Zotero and save in this directory
 ---
 
-This notebook is documentation of a simple model of the heat transfer from the water in the tank to the test chamber under AS/NZS 4692.1. @joint_technical_committee_el-20___electric_water_heating_appliances_electric_2005
+This notebook is documentation of a method to model the heat transfer from the surfaces of the hot water cylinder to the ambient when tested under AS/NZS 4692.1.
   
-The heat transfer is conductive from the water through the insulation to the surface per Appendix E of AS/NZS 4692.1. Assume the surface temperature is constant and the same on all surfaces. Then from the top and side use a combination of radiative and convective heat transfer to ambient. The convective heat loss is both free and forced.c The heat transfer across the air gap is conductive down through air and radiative to the floor. Assume all surfaces in the test chamber are at the ambient temperatures.
+The heat transfer is conductive from the water through the insulation to the surface per Appendix E of AS/NZS 4692.1.[@jointtechnicalcommitteeel-20electricwaterheatingappliancesElectricWaterHeaters2005a] For each surface, top, side, and bottom, assume the surface temperature is constant. Assume the water in the tank is perfectly mixed and at a constant temperature. Neglect the thermal resistance of the metal wall of the tank and at the surface of the insulation.
+
+Calculate the heat transfer from the top and side surfaces with a combination of radiative and convective heat transfer to ambient. For the side the convective heat transfer is calculated with a combination of natural and forced convection. The heat transfer from the bottom is calculated as conductive through a wood platform and then convective downward through air and radiative to the floor. Assume all surfaces in the test chamber are at the ambient temperature.
   
-Assume the water in the tank is perfectly mixed and at a constant temperature. Neglect the thermal resistance of the metal wall of the tank and at the surface of the insulation.
+The heat transfer from the water to the surfaces must equal the heat transfer from the surfaces to the test chamber. This is done by setting the initial surface temperatures to 25 °C then calculating the initial heat transfer to and from the surfaces. The surface temperatures are then iteratively adjusted until the heat fluxes at each surface are equal.
 
 ```{r}
 Tamb   = 20  # °C
 Twater = 75  # °C
 Vair   = 0.25  # air speed within range of 0.25 m/s and 0.5 m/s
-k      = 0.025  # polyurethane W/m-K, from 4234 Appendix E
+k_ins  = 0.025  # polyurethane W/m-K, from 4234 Appendix E
 ```
 
-The water heater and information about it are from the Predictive Modeling Tool (PMT)  @bart_milne_optimisation_2021 
+The water heater and information about it are from the Predictive Modeling Tool (PMT) @bartmilneOptimisationStatisticalEstimation2021 The insulation thicknesses determined by the PMT are used here.
 
-This example is based on the Rinnai MS1805503 0 model tested to 4692. For volumes, dimensions, and insulation thicknesses see Table 7: Hot water cylinder model, MEPS and measurement information. 
+This example is based on the Rinnai model 'MS1805503 0'  tested to 4692. For volumes, dimensions, and insulation thicknesses see Table 7: Hot water cylinder model, MEPS and measurement information. 
 
 ```{r}
-vol       =	0.18 # m^3	
-diam      =	0.55 # m
+vol       =	0.18  # m^3	
+diam      =	0.55  # m
 height		= 1.295 # m
 dx_side		= 0.053 # m side insulation thickness
 dx_ends		= 0.060 # m top and bottom insulation thickness
 
 ```
 
-Use heat transfer equations from Chapter 4, Heat Transfer, ASHRAE Fundamentals. @technical_committee_13_heat_transfer_and_fluid_flow_chapter_2017
+These calculations are based on the heat transfer equations and correlations from from Chapter 4, Heat Transfer, ASHRAE Fundamentals.@technicalcommittee1.3heattransferandfluidflow.ChapterHeatTransfer2017 
 
 ## Conductive heat loss from water to surface #
 
-The simple idealized tank model in 4234 Appendix E consists only of losses through the insulation on the sides and at the ends of the tank. There are no losses through the corners. Thus the insulation can be modeled as a hollow cylinder and to circular disks.
+The simple idealized tank model in 4234 Appendix E consists only of losses through the insulation on the sides and at the ends of the tank. There are no losses through the corners. Thus the insulation can be modeled as a hollow cylinder and two circular disks.
 
-To check the equations at this stage assume the surface temperature of the insulation is 25 °C 
+To check the equations at this step in the calculations assume the surface temperature of the insulation at each side is 25 °C 
 
 ```{r}
-Tsurf = 25 # °C 
+Tsurf.top  = 25 # °C 
+Tsurf.side = 25 # °C 
+Tsurf.bot  = 25 # °C 
 ```
 
 
-### Conductive heat loss through side #
+### Conductive heat loss through side insulation #
 
 For the hollow cylinder the equation is written as,
-$$Q_{side} = \frac{2 \pi k h}{ln(\frac{d_o}{d_i})} {\Delta T } $$
+$$Q_{surf.side} = \frac{2 \pi k_{ins} h}{ln(\frac{d_o}{d_i})} {\Delta T } $$
 Or rewritten to account for the thicknesses of insulation,
-$$Q_{side} = \frac{2 \pi k (height- 2 dx_{ends} )}
-{ln(\frac{diam}{(diam-(2dx_{side}))})}{(T_{water} - T_{surf})) } $$
+$$Q_{surf.side} = \frac{2 \pi k (height- 2 dx_{ends} )}
+{ln(\frac{diam}{(diam-(2dx_{side}))})}{(T_{water} - T_{surf.side})) } $$
 
 
 ```{r}
-Qside = ( 2 * pi * k * (height - 2 * dx_ends) ) / 
+Qsurf.side <- function( 
+  # function to calculate the heat transfer through the side insulation
+  height,      # height of cylinder, m
+  diam,        # diameter of cylinder, m
+  dx_ends,     # thickness of end insulation, m
+  dx_side,     # thickness of side insulation, m
+  Tsurf.side,  # side surface temperature, °C
+  Twater = 75, # temperature of water, °C
+  k_ins = 0.025 # thermal conductivity of side insulation,  W/m-K
+)
+{
+  Qsurf.side = ( 2 * pi * k_ins * (height - 2 * dx_ends) ) / 
         ( log(diam/(diam-(2*dx_side)) ) ) *
-          (Twater - Tsurf)
+          (Twater - Tsurf.side)
 
+  return(Qsurf.side)
+}
 ```
-So with the assumed surface temperature, the heat loss through the side insulation is `r round(Qside,1)` (W) or in kWh/day `r round(Qside*(24/1000),3)`
 
-### Conductive heat loss through ends #
+```{r}
+# calculate Qsurf.side
+Qsurf.side = Qsurf.side(height, diam, dx_ends, dx_side, Tsurf.side)
+```
 
-The conductive loss from both ends is
+
+\So with the initial surface temperature, the heat loss through the side insulation is `r round(Qsurf.side,1)` (W) or in kWh/day `r round(Qsurf.side*(24/1000),3)`
+
+### Conductive heat loss through top insulation #
+
+The conductive loss through the t is
 
 $$
-Q_{cond,ends} = \frac{2 \pi k ( (r_i)^2 (\Delta T) )}
+Q_{surf.top} = \frac{2 \pi k ( (r_i)^2 (\Delta T) )}
 {dx_{ends}}
 $$
 Which can be rewritten as 
 
 $$
-Q_{cond,ends} = \frac{2 \pi k  (\frac{diam- 2 dx_{ends}}{2})^2 (T_{water} - T_{surf}) }
+Q_{surf.top} = \frac{2 \pi k  (\frac{diam- 2 dx_{ends}}{2})^2 (T_{water} - T_{surf}) }
 {dx_{ends}}
 $$
 and then simplified as 
 
 $$
-Q_{cond,ends} = \frac{ \pi k  ({diam- 2 dx_{ends}})^2 (T_{water} - T_{surf}) }
+Q_{surf.top} = \frac{ \pi k  ({diam- 2 dx_{ends}})^2 (T_{water} - T_{surf}) }
 {2dx_{ends}}
 $$
 
 ```{r}
-Qends = ( pi * k * (diam - 2 * dx_ends)^2  * (Twater - Tsurf) )/ 
+Qsurf.top = ( pi * k * (diam - 2 * dx_ends)^2  * (Twater - Tsurf) )/ 
         ( 2*dx_ends) 
 
 ```
 
-So with the assumed surface temperature, the conductive heat loss through the insulation at the ends is `r round(Qends,1)` (W) or `r round(Qends*(24/1000),3)` (kWh/day)
+So with the initial surface temperature, the conductive heat loss through the insulation at the ends is `r round(Qsurf.top,1)` (W) or `r round(Qsurf.top*(24/1000),3)` (kWh/day)
 
 
 
