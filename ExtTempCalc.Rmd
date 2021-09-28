@@ -33,12 +33,13 @@ dx_ends		= 0.060 # m top and bottom insulation thickness
 ```
 
 These calculations are based on the heat transfer equations and correlations from from Chapter 4, Heat Transfer, ASHRAE Fundamentals.@technicalcommittee1.3heattransferandfluidflow.ChapterHeatTransfer2017 
+`r source("ExtTempFunc.R")`
 
 ## Conductive heat loss from water to surface #
 
 The simple idealized tank model in 4234 Appendix E consists only of losses through the insulation on the sides and at the ends of the tank. There are no losses through the corners. Thus the insulation can be modeled as a hollow cylinder and two circular disks.
 
-To check the equations at this step in the calculations assume the surface temperature of the insulation at each side is 25 °C 
+To check the equations at this step in the calculations assume the initial surface temperature of the insulation at each side is 25 °C 
 
 ```{r}
 Tsurf.top  = 25 # °C 
@@ -56,29 +57,15 @@ $$Q_{surf.side} = \frac{2 \pi k (height- 2 dx_{ends} )}
 {ln(\frac{diam}{(diam-(2dx_{side}))})}{(T_{water} - T_{surf.side})) } $$
 
 
-```{r}
-Qsurf.side <- function( 
-  # function to calculate the heat transfer through the side insulation
-  height,      # height of cylinder, m
-  diam,        # diameter of cylinder, m
-  dx_ends,     # thickness of end insulation, m
-  dx_side,     # thickness of side insulation, m
-  Tsurf.side,  # side surface temperature, °C
-  Twater = 75, # temperature of water, °C
-  k_ins = 0.025 # thermal conductivity of side insulation,  W/m-K
-)
-{
-  Qsurf.side = ( 2 * pi * k_ins * (height - 2 * dx_ends) ) / 
-        ( log(diam/(diam-(2*dx_side)) ) ) *
-          (Twater - Tsurf.side)
-
-  return(Qsurf.side)
-}
-```
 
 ```{r}
 # calculate Qsurf.side
-Qsurf.side = Qsurf.side(height, diam, dx_ends, dx_side, Tsurf.side)
+Qsurf.side <- Qcond.cyl(length = height - 2 * dx_ends,
+                       r_inner = diam-(2*dx_side),
+                       r_outer = diam,
+                       T_inner = Twater,
+                       T_outer = Tsurf.side,
+                       k = k_ins)
 ```
 
 
@@ -99,23 +86,6 @@ $$
 Q_{surf.top} = \frac{ \pi k_{ins}  \left( \frac{diam - 2 dx_{side}}{2} \right)^2  }
 {dx_{ends}}(T_{water} - T_{surf.top})
 $$
-
-
-```{r}
-Qcond.disc <- function( 
-  # function to calculate conductive heat transfer through a disc
-  radius,       # radius of disc, m
-  thick,        # thickness of cylinder, m
-  Thot = 75,    # hot surface temperature, °C
-  Tcold,        # cold surface temperature, °C
-  k = k_ins     # thermal conductivity of disc, W/m-K
-)
-{
-  Qcond.disc = ( (k_ins * pi * radius^2) / (thick)) * (Thot - Tcold)
-
-  return(Qcond.disc)
-}
-```
 
 ```{r}
 Qsurf.top = Qcond.disc(radius = ((diam - 2 * dx_side)/2), 
