@@ -180,7 +180,7 @@ L     = 1.295,    # the vertical length (m),
 nu    = 15.28e-6 # the kinematic viscosity (m2/s), using air at 22.5°C
 ) 
 {
-  Gr = g * beta * (Ts - Tamb) * L ^ 3 / nu^3
+  Gr = g * beta * (Ts - Tamb) * L ^ 3 / nu^2
   return(Gr)
 }
 
@@ -188,11 +188,15 @@ nu    = 15.28e-6 # the kinematic viscosity (m2/s), using air at 22.5°C
 ```
 With these values the Grashof number is `r sprintf("%7.4e ", Gr())`
 
+If the diameter of vertical cylinder is large enough relative to the height, the natural convection correlations for a vertical heated plate can be used.@technical_committee_13_heat_transfer_and_fluid_flow_chapter_2017 Using this correlation is appropriate when $$ D/L > 35/Gr^{1/4} $$
+
+In this case $\frac{D}{L}$ is `r sprintf("%5.4f",diam/height)` and $\frac{35}{Gr^{1/4}}$ is `r sprintf("%5.4f",35/(Gr()^(1/4)))` so treating a hot water cylinder as a vertical plate for natural convection is appropriate.
+
 #### Prandtl number #
 
 The Prandtl number is calculated as 
 
-$$Gr_ = \frac{\nu}{\alpha}$$
+$$Gr = \frac{c_p \mu}{k}= \frac{\nu}{\alpha}$$
 
 where;
 ```{r}
@@ -218,11 +222,18 @@ alpha = 22.045e-6 # the thermal diffusivity (m2/s) for air at 22.5°C)
 With these values the Prandtl number is `r sprintf("%7.4f ", Pr())`
 
 
+#### Rayleigh number #
+
+The Rayleigh number is calculated as ${Gr}{Pr}$. In these conditions the Rayleigh number is `r sprintf("%5.4e",Gr()*Pr())`
 
 
 ## Heat Loss from Side Surface to Ambient #
 
-
+For this Rayleigh number and Prandtl number the Nusselt Number is calculated as @technical_committee_13_heat_transfer_and_fluid_flow_chapter_2017 
+$$
+Nu = \left\{{0.825 + \frac{0.387Ra^{\frac{1}{6}}}
+                { \left[ 1 + \left( \frac{0.437}{Pr} \right) ^ \frac{9}{16} \right] ^\frac{8}{27}}} \right\}^2
+$$
 
 
 
