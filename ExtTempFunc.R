@@ -124,3 +124,31 @@ Ra <- function(
   return(Ra)
 }
 
+Nu_vert <- function(
+  # Vertical plate, Tsurf = constant
+  # Characteristic dimension: L = height
+  # Properties at (ts + t∞)/2 except β at t∞  
+  Ra,  # Rayleigh number
+  Pr   # Prandtl number
+) 
+{
+  if (Ra < 10^9) {
+    Nu_vert = 0.68 + 
+      (0.67 * Ra^(1/4)) /
+      ( 1 + (0.492/Pr)^(9/16)  )^(4/9)
+    
+  } else {
+    if (Ra < 10^12) {
+      Nu_vert = (0.825 + 
+                   (0.387 * Ra^(1/6)) /
+                   ( 1 + (0.437/Pr)^(9/16)  )^(8/27)
+      )^2
+    } else {
+      Nu_vert = NA
+    }
+  }
+  
+  return(Nu_vert)
+  
+}
+
