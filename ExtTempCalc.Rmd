@@ -13,10 +13,10 @@ Calculate the heat transfer from the top and side surfaces with a combination of
 The heat transfer from the water to the surfaces must equal the heat transfer from the surfaces to the test chamber. This is done by setting the initial surface temperatures to 25 °C then calculating the initial heat transfer to and from the surfaces. The surface temperatures are then iteratively adjusted until the heat fluxes at each surface are equal.
 
 ```{r}
-Tamb   = 20  # °C
-Twater = 75  # °C
-Vair   = 0.25  # air speed within range of 0.25 m/s and 0.5 m/s
-k_ins  = 0.025  # polyurethane W/m-K, from 4234 Appendix E
+Tamb   <- 20  # °C
+Twater <- 75  # °C
+Vair   <- 0.25  # air speed within range of 0.25 m/s and 0.5 m/s
+k_ins  <- 0.025  # polyurethane W/m-K, from 4234 Appendix E
 ```
 
 The water heater and information about it are from the Predictive Modeling Tool (PMT) @bartmilneOptimisationStatisticalEstimation2021 The insulation thicknesses determined by the PMT are used here.
@@ -24,11 +24,11 @@ The water heater and information about it are from the Predictive Modeling Tool 
 This example is based on the Rinnai model 'MS1805503 0'  tested to 4692. For volumes, dimensions, and insulation thicknesses see Table 7: Hot water cylinder model, MEPS and measurement information. 
 
 ```{r}
-vol       =	0.18  # m^3	
-diam      =	0.55  # m
-height		= 1.295 # m
-dx_side		= 0.053 # m side insulation thickness
-dx_ends		= 0.060 # m top and bottom insulation thickness
+vol       <-	0.18  # m^3	
+diam      <-	0.55  # m
+height		<- 1.295 # m
+dx_side		<- 0.053 # m side insulation thickness
+dx_ends		<- 0.060 # m top and bottom insulation thickness
 
 ```
 
@@ -45,9 +45,9 @@ The simple idealized tank model in 4234 Appendix E consists only of losses throu
 To check the equations at this step in the calculations assume the initial surface temperature of the insulation at each side is 25 °C 
 
 ```{r}
-Tsurf.top  = 25 # °C 
-Tsurf.side = 25 # °C 
-Tsurf.bot  = 25 # °C 
+Tsurf.top  <- 25 # °C 
+Tsurf.side <- 25 # °C 
+Tsurf.bot  <- 25 # °C 
 ```
 
 
@@ -91,7 +91,7 @@ Q_{surf.top} = \frac{ \pi k_{ins}  \left( \frac{diam - 2 dx_{side}}{2} \right)^2
 $$
 
 ```{r}
-Qsurf.top = Qcond.disc(radius = ((diam - 2 * dx_side)/2), 
+Qsurf.top <- Qcond.disc(radius = ((diam - 2 * dx_side)/2), 
                        thick = dx_ends,
                        Tcold = Tsurf.top)
 
@@ -107,7 +107,7 @@ Q_{surf.bot} = \frac{ \pi k_{ins}  \left( \frac{diam - 2 dx_{side}}{2} \right)^2
 {dx_{ends}}(T_{water} - T_{surf.bot})
 $$
 ```{r}
-Qsurf.bot = Qcond.disc(radius = ((diam - 2 * dx_side)/2), 
+Qsurf.bot <- Qcond.disc(radius = ((diam - 2 * dx_side)/2), 
                        thick = dx_ends,
                        Tcold = Tsurf.bot)
 
@@ -144,16 +144,16 @@ $$Gr_ = \frac{g \beta (T_s-T_{\infty}) L^3}{\mu^2}$$
 
 where;
 ```{r}
-g     = 9.81     # acceleration due to Earth's gravity (m/s^2)
-beta  = 3.43e-3  # the coefficient of thermal expansion of air at 20°C (1/K)
-Ts    = 25       # the surface temperature (°C ), using initial estimate here
-Tamb  = 20       # the bulk temperature (°C)
-mu    = 15.28e-6 # the kinematic viscosity (m2/s), using air at 22.5°C
+g     <- 9.81     # acceleration due to Earth's gravity (m/s^2)
+beta  <- 3.43e-3  # the coefficient of thermal expansion of air at 20°C (1/K)
+Ts    <- 25       # the surface temperature (°C ), using initial estimate here
+Tamb  <- 20       # the bulk temperature (°C)
+mu    <- 15.28e-6 # the kinematic viscosity (m2/s), using air at 22.5°C
 
 ```
 
 ```{r}
-Gr <- Gr(L=height, Tsurf = Ts)
+Gr <- Gr(L=height)
 
 ```
 
@@ -167,12 +167,12 @@ In this case $\frac{D}{L}$ is `r sprintf("%5.4f",diam/height)` and $\frac{35}{Gr
 
 The Prandtl number is calculated as 
 
-$$Gr = \frac{c_p \mu}{k}= \frac{\nu}{\alpha}$$
+$$Pr = \frac{c_p \mu}{k}= \frac{\nu}{\alpha}$$
 
 where;
 ```{r}
-mu    = 15.28e-6  # the kinematic viscosity (m2/s), for air air at 22.5°C
-alpha = 22.045e-6 # the thermal diffusivity (m2/s) for air at 22.5°C)
+mu    <- 15.28e-6  # the kinematic viscosity (m2/s), for air air at 22.5°C
+alpha <- 22.045e-6 # the thermal diffusivity (m2/s) for air at 22.5°C)
 
 ```
 
@@ -219,7 +219,7 @@ For these conditions the Nusselt number of the natural convective off the side o
 To apply the Nusselt number requires the thermal conductivity of air
 
 ```{r}
-k_air  = 26.06e-3 #  W/m-K thermal conductivity of air at 22.5 °C      
+k_air  <- 26.06e-3 #  W/m-K thermal conductivity of air at 22.5 °C      
 ```
 
 The heat transfer coefficient is the $ h = Nu * k / height$
@@ -272,7 +272,7 @@ Re.cyl.frc <-Re.cyl.frc(
 
 
 ```{r}
-Nu.vert.nat <- Nu.vert.nat(Ra,Pr)
+Nu.cyl.frc <- Nu.cyl.frc(Ra,Pr)
 ```
 
 For these conditions the Nusselt number of the natural convective off the side of the tank is `r sprintf("%5.2f",Nu.vert.nat)`
@@ -280,7 +280,7 @@ For these conditions the Nusselt number of the natural convective off the side o
 To apply the Nusselt number requires the thermal conductivity of air
 
 ```{r}
-k_air  = 26.06e-3 #  W/m-K thermal conductivity of air at 22.5 °C      
+k_air  <- 26.06e-3 #  W/m-K thermal conductivity of air at 22.5 °C      
 ```
 
 The heat transfer coefficient is the $ h = Nu * k / height$

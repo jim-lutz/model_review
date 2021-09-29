@@ -12,7 +12,7 @@ beta <- function(
   Tair = 20 # air temperature, °C 
   # default beta = 3.43e-3  
 ){
-  beta = (-0.01048275862069 * Tair + 3.63793103448276) * 1e-3
+  beta <- (-0.01048275862069 * Tair + 3.63793103448276) * 1e-3
   return(beta)
 }
 
@@ -22,7 +22,7 @@ nu <- function(
   Tair = 22.5 # air temperature, °C 
   # default nu = 15.28e-6 
 ){
-  nu = (0.094*Tair + 13.17) * 1e-6
+  nu <- (0.094*Tair + 13.17) * 1e-6
   return(nu)
   }
 
@@ -32,7 +32,7 @@ alpha <- function(
   Tair = 22.5 # air temperature, °C 
   # default alpha =  22.045e-6 
 ){
-  alpha = (0.143853658536585*Tair + 18.7818536585366) * 1e-6
+  alpha <- (0.143853658536585*Tair + 18.7818536585366) * 1e-6
   return(alpha)
 }
 
@@ -43,7 +43,7 @@ k_air <- function(
   Tair = 22.5 # air temperature, °C 
   # default k_air = 26.06e-3
   ){
-  k_air = 0.071967176004528 * Tair + 24.4579117147708
+  k_air <- 0.071967176004528 * Tair + 24.4579117147708
   return(k_air)
   }
 
@@ -64,7 +64,7 @@ Qcond.cyl <- function(
   k = 0.025     # thermal conductivity of cylinder,  W/m-K, default to polyurethane
 )
 {
-  Qcond.cyl = ( 2 * pi * k * length *(T_inner - T_outer)) / 
+  Qcond.cyl <- ( 2 * pi * k * length *(T_inner - T_outer)) / 
     ( log(r_outer/r_inner) )
   
   return(Qcond.cyl)
@@ -79,7 +79,7 @@ Qcond.disc <- function(
   k = k_ins     # thermal conductivity of disc, W/m-K
 )
 {
-  Qcond.disc = ( (k_ins * pi * radius^2) / (thick)) * (Thot - Tcold)
+  Qcond.disc <- ( (k_ins * pi * radius^2) / (thick)) * (Thot - Tcold)
   
   return(Qcond.disc)
 }
@@ -100,7 +100,7 @@ Gr <- function(
   mu    = 15.28e-6  # the kinematic viscosity (m2/s), using air at 22.5°C
 ) 
 {
-  Gr = ( g * beta * (Tsurf - Tamb) * L ^ 3 )/ mu^2
+  Gr <- ( g * beta * (Tsurf - Tamb) * L ^ 3 )/ mu^2
   return(Gr)
 }
 
@@ -110,7 +110,7 @@ Pr <- function(
   alpha = 22.045e-6 # the thermal diffusivity (m2/s) for air at 22.5°C)
 ) 
 {
-  Pr =  mu / alpha
+  Pr <- mu / alpha
   return(Pr)
 }
 
@@ -120,7 +120,7 @@ Ra <- function(
   Pr   # Prandtl number
 ) 
 {
-  Ra = Gr * Pr
+  Ra <- Gr * Pr
   return(Ra)
 }
 
@@ -134,18 +134,18 @@ Nu.vert.nat <- function(
 ) 
 {
   if (Ra < 10^9) {
-    Nu.vert.nat = 0.68 + 
+    Nu.vert.nat <- 0.68 + 
       (0.67 * Ra^(1/4)) /
       ( 1 + (0.492/Pr)^(9/16)  )^(4/9)
     
   } else {
     if (Ra < 10^12) {
-      Nu.vert.nat = (0.825 + 
+      Nu.vert.nat <- (0.825 + 
                    (0.387 * Ra^(1/6)) /
                    ( 1 + (0.437/Pr)^(9/16)  )^(8/27)
       )^2
     } else {
-      Nu.vert.nat = NA
+      Nu.vert.nat <- NA
     }
   }
   
@@ -192,9 +192,4 @@ Nu.cyl.frc <- function(
 
 } 
   
-
-  
-
-
-
 
