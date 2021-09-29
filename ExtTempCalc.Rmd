@@ -33,7 +33,10 @@ dx_ends		= 0.060 # m top and bottom insulation thickness
 ```
 
 These calculations are based on the heat transfer equations and correlations from from Chapter 4, Heat Transfer, ASHRAE Fundamentals.@technicalcommittee1.3heattransferandfluidflow.ChapterHeatTransfer2017 
-`r source("ExtTempFunc.R")`
+
+```{r}
+source("ExtTempFunc.R")
+```
 
 ## Conductive heat loss from water to surface #
 
@@ -150,8 +153,7 @@ mu    = 15.28e-6 # the kinematic viscosity (m2/s), using air at 22.5°C
 ```
 
 ```{r}
-Gr <- Gr(L=height)
-
+Gr <- Gr(L=height, Ts=Tsurf)
 
 ```
 
@@ -169,27 +171,15 @@ $$Gr = \frac{c_p \mu}{k}= \frac{\nu}{\alpha}$$
 
 where;
 ```{r}
-nu    = 15.28e-6  # the kinematic viscosity (m2/s), for air air at 22.5°C
+mu    = 15.28e-6  # the kinematic viscosity (m2/s), for air air at 22.5°C
 alpha = 22.045e-6 # the thermal diffusivity (m2/s) for air at 22.5°C)
 
 ```
 
-```{r}
-# this is a function to calculate the Prandtl number
-# defaults to the previous values are provided
-# explicitly define if using different values
-Pr <- function(
-nu    = 15.28e-6,  # the kinematic viscosity (m2/s), using air at 22.5°C
-alpha = 22.045e-6 # the thermal diffusivity (m2/s) for air at 22.5°C)
-) 
-{
-  Pr =  nu / alpha
-  return(Pr)
-}
-```
+
 ```{r}
 # Calculate the current value of Pr
-Pr <- Pr()
+Pr <- Pr(mu, alpha)
 ```
 With these values the Prandtl number is `r sprintf("%7.4f ", Pr)`
 
@@ -198,17 +188,7 @@ With these values the Prandtl number is `r sprintf("%7.4f ", Pr)`
 
 The Rayleigh number is calculated as ${Gr}{Pr}$. 
 
-```{r}
-# this is a function to calculate the Rayleigh number
-Ra <- function(
-  Gr,  # Grashof number
-  Pr  # Prandtl number
-  ) 
-{
-  Ra = Gr * Pr
-  return(Ra)
-}
-```
+
 ```{r}
 # Calculate the current value of Ra
 Ra <- Ra(Gr,Pr)

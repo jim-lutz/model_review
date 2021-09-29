@@ -104,5 +104,23 @@ Gr <- function(
   return(Gr)
 }
 
-# sprintf("%7.4e ", Gr())
-# [1] "1.5649e+09 "
+Pr <- function(
+  # calculate the Prandtl number
+  mu    = 15.28e-6,  # the kinematic viscosity (m2/s), using air at 22.5°C
+  alpha = 22.045e-6 # the thermal diffusivity (m2/s) for air at 22.5°C)
+) 
+{
+  Pr =  mu / alpha
+  return(Pr)
+}
+
+Ra <- function(
+  # calculate the Rayleigh number
+  Gr,  # Grashof number
+  Pr  # Prandtl number
+) 
+{
+  Ra = Gr * Pr
+  return(Ra)
+}
+
