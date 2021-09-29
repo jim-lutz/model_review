@@ -199,7 +199,9 @@ In these conditions the Rayleigh number is `r sprintf("%5.4e",Ra)`
 
 ## Heat Loss from Tank Side Surface to Ambient #
 
-For this Rayleigh number, the Nusselt Number for a vertical plate is calculated as @technical_committee_13_heat_transfer_and_fluid_flow_chapter_2017 
+### Natural Convection #
+
+For this Rayleigh number, the Nusselt Number for natural convection from a vertical plate is calculated as @technical_committee_13_heat_transfer_and_fluid_flow_chapter_2017 
 $$
 Nu_{vert} = \left\{{0.825 + \frac{0.387Ra^{\frac{1}{6}}}
                 { \left[ 1 + \left( \frac{0.437}{Pr} \right) ^ \frac{9}{16} 
@@ -209,10 +211,10 @@ $$
 
 
 ```{r}
-Nu_vert <- Nu_vert(Ra,Pr)
+Nu.vert.nat <- Nu.vert.nat(Ra,Pr)
 ```
 
-For these conditions the Nusselt number of the natural convective off the side of the tank is `r sprintf("%5.2f",Nu_vert)`
+For these conditions the Nusselt number of the natural convective off the side of the tank is `r sprintf("%5.2f",Nu.vert.nat)`
 
 To apply the Nusselt number requires the thermal conductivity of air
 
@@ -220,16 +222,17 @@ To apply the Nusselt number requires the thermal conductivity of air
 k_air  = 26.06e-3 #  W/m-K thermal conductivity of air at 22.5 °C      
 ```
 
+The heat transfer coefficient is the $ h = Nu * k / height$
 
 ```{r}
 # calculate the heat transfer coefficient in W/m^2-K
-h_side.conv.nat <- Nu_vert * k_air / height
+h_side.conv.nat <- Nu.vert.nat * k_air / height
 
 ```
 
 So the convective heat transfer coefficient from the side of the tank is `r sprintf("%5.2f",h_side.conv.nat)` W/m^2-k 
 
-The natural convective heat transfer from the side of the tank is
+The heat transfer from natural convection off the side of the tank is
 $$
 Q_{side.conv} = h_{side} ( diam  \times \pi \times height)  (T_{surf}-T_{amb})
 $$
@@ -240,11 +243,79 @@ $$
 So the natural convective heat loss from the side of the tank is
 `r sprintf("%5.3f",Qside.conv.nat)` W or `r sprintf("%5.3f",Qside.conv.nat*24/1000)` kWh/day
 `
+
+### Forced Convection #
+
+The Nusselt Number for forced convection across a cylinder is calculated as @technical_committee_13_heat_transfer_and_fluid_flow_chapter_2017 
+$$
+Nu_{cyl} =  0.3 + \frac{0.62 Re^{\frac{1}{2}}Pr^{\frac{1}{3}}}
+                  { \left[ 1 + (\frac{0.4}{Pr})^{\frac{2}{3}} \right] ^{\frac{1}{4}}}
+\left[ 1 + \left( \frac{Re}{282000} \right) ^ {\frac{5}{8}} \right] ^{\frac{4}{5}}
+$$
+
+The Reynolds number (Re) for cross flow over cylinder is $ \frac{VD}{\nu}$ 
+where;
+  V = air speed velocity, m/s  
+  D = diameter, m   (This is the charactistic number here)
+  $\nu$ = kinematic viscosity of air, m^2/s
+
+
+```{r}
+# Calculate the current value of Re
+Re.cyl.frc <-Re.cyl.frc(
+  V = Vair,
+  D = diam,
+  nu = nu()
+)
+```
+
+
+
+```{r}
+Nu.vert.nat <- Nu.vert.nat(Ra,Pr)
+```
+
+For these conditions the Nusselt number of the natural convective off the side of the tank is `r sprintf("%5.2f",Nu.vert.nat)`
+
+To apply the Nusselt number requires the thermal conductivity of air
+
+```{r}
+k_air  = 26.06e-3 #  W/m-K thermal conductivity of air at 22.5 °C      
+```
+
+The heat transfer coefficient is the $ h = Nu * k / height$
+
+```{r}
+# calculate the heat transfer coefficient in W/m^2-K
+h_side.conv.nat <- Nu.vert.nat * k_air / height
+
+```
+
+So the convective heat transfer coefficient from the side of the tank is `r sprintf("%5.2f",h_side.conv.nat)` W/m^2-k 
+
+The heat transfer from natural convection off the side of the tank is
+$$
+Q_{side.conv} = h_{side} ( diam  \times \pi \times height)  (T_{surf}-T_{amb})
+$$
+```{r}
+ Qside.conv.nat <- h_side.conv.nat * diam * pi * height * (Tsurf.side - Tamb)
+```
+
+So the natural convective heat loss from the side of the tank is
+`r sprintf("%5.3f",Qside.conv.nat)` W or `r sprintf("%5.3f",Qside.conv.nat*24/1000)` kWh/day
+`
+
+
+
+
+
+
 ```{r}
 Qsurf.side
 Qside.conv.nat
 ```
 Qsurf.side > Qside.conv so have to raise Tsurf until they are equal.
+except probably need to add Qside.conv.frc
 
 
 

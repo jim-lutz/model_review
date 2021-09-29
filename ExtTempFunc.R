@@ -117,15 +117,16 @@ Pr <- function(
 Ra <- function(
   # calculate the Rayleigh number
   Gr,  # Grashof number
-  Pr  # Prandtl number
+  Pr   # Prandtl number
 ) 
 {
   Ra = Gr * Pr
   return(Ra)
 }
 
-Nu_vert <- function(
-  # Vertical plate, Tsurf = constant
+Nu.vert.nat <- function(
+  # Natural Convection Correlation for Vertical plate, 
+  # Tsurf = constant
   # Characteristic dimension: L = height
   # Properties at (ts + t∞)/2 except β at t∞  
   Ra,  # Rayleigh number
@@ -133,22 +134,67 @@ Nu_vert <- function(
 ) 
 {
   if (Ra < 10^9) {
-    Nu_vert = 0.68 + 
+    Nu.vert.nat = 0.68 + 
       (0.67 * Ra^(1/4)) /
       ( 1 + (0.492/Pr)^(9/16)  )^(4/9)
     
   } else {
     if (Ra < 10^12) {
-      Nu_vert = (0.825 + 
+      Nu.vert.nat = (0.825 + 
                    (0.387 * Ra^(1/6)) /
                    ( 1 + (0.437/Pr)^(9/16)  )^(8/27)
       )^2
     } else {
-      Nu_vert = NA
+      Nu.vert.nat = NA
     }
   }
   
-  return(Nu_vert)
+  return(Nu.vert.nat)
   
 }
+
+
+
+# Functions for forced convective heat transfer
+# from 2021 ASHRAE® HANDBOOK FUNDAMENTALS, SI Edition
+# CHAPTER 4 HEAT TRANSFER
+# Table 8 Forced-Convection Correlations
+
+Re.cyl.frc <- function( 
+  # Reynolds number for cross flow over cylinder
+  V, # air velocity, m/s
+  D, # diameter, m    this is the characteristic length
+  nu   # kinematic viscosity, (m2/s)
+){
+  Re.cyl.frc <- V * D / nu
+  
+  return(Re.cyl.frc)
+}
+
+
+
+Nu.cyl.frc <- function(
+  # Nusselt number for forced flow over cylinder
+  # IV. External Flows for Cross Flow over Cylinder: 
+  # Characteristic length = D = diameter. Re = VD/ν.
+  # All properties at arithmetic mean of surface and fluid temperatures.
+  # Average value of h
+  Re,  # Reynolds number
+  Pr   # Prandtl number
+){
+  Nu.cyl.frc <- 0.3 + (
+    ( 0.62 * Re^(1/2) * Pr^(1/3) ) / 
+    ( 1 + (0.4/Pr)^(2/3) ) ^(1/4)
+                      ) *
+    ( 1 + (Re/282000)^(5/8) ) ^(4/5)
+
+  return(Nu.cyl.frc)
+
+} 
+  
+
+  
+
+
+
 
