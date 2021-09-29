@@ -84,3 +84,25 @@ Qcond.disc <- function(
   return(Qcond.disc)
 }
   
+
+# Functions for natural convective heat transfer
+# from 2021 ASHRAE® HANDBOOK FUNDAMENTALS, SI Edition
+# CHAPTER 4 HEAT TRANSFER
+# Table 9 Natural Convection Correlations
+
+Gr <- function(
+  # calculate the Grashof number
+  g     = 9.81,     # acceleration due to Earth's gravity (m/s^2)
+  beta  = 3.43e-3,  # the coefficient of thermal expansion of air at 20°C (1/K)
+  Tsurf = 25,       # the surface temperature (°C )
+  Tamb  = 20,       # the bulk temperature (°C)
+  L ,               # characteristic length (m)
+  mu    = 15.28e-6  # the kinematic viscosity (m2/s), using air at 22.5°C
+) 
+{
+  Gr = ( g * beta * (Tsurf - Tamb) * L ^ 3 )/ mu^2
+  return(Gr)
+}
+
+# sprintf("%7.4e ", Gr())
+# [1] "1.5649e+09 "

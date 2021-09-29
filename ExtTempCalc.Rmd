@@ -137,7 +137,7 @@ The Prandtl number (Pr) is a dimensionless number defined as the ratio of moment
 
 The Grashof number is calculated as 
 
-$$Gr_ = \frac{g \beta (T_s-T_{\infty}) L^3}{\nu^2}$$
+$$Gr_ = \frac{g \beta (T_s-T_{\infty}) L^3}{\mu^2}$$
 
 where;
 ```{r}
@@ -145,34 +145,21 @@ g     = 9.81     # acceleration due to Earth's gravity (m/s^2)
 beta  = 3.43e-3  # the coefficient of thermal expansion of air at 20°C (1/K)
 Ts    = 25       # the surface temperature (°C ), using initial estimate here
 Tamb  = 20       # the bulk temperature (°C)
-L     = height   # the vertical length (m), 
-nu    = 15.28e-6 # the kinematic viscosity (m2/s), using air at 22.5°C
+mu    = 15.28e-6 # the kinematic viscosity (m2/s), using air at 22.5°C
 
 ```
+
 ```{r}
-# this is a function to calculate the Grashof number
-# defaults to the previous values are provided
-# explicitly define if using different values
-Gr <- function(
-g     = 9.81,     # acceleration due to Earth's gravity (m/s^2)
-beta  = 3.43e-3,  # the coefficient of thermal expansion of air at 20°C (1/K)
-Ts    = 25,       # the surface temperature (°C ), using initial estimate here
-Tamb  = 20,       # the bulk temperature (°C)
-L     = 1.295,    # the vertical length (m), 
-nu    = 15.28e-6 # the kinematic viscosity (m2/s), using air at 22.5°C
-) 
-{
-  Gr = g * beta * (Ts - Tamb) * L ^ 3 / nu^2
-  return(Gr)
-}
+Gr <- Gr(L=height)
 
 
 ```
-With these values the Grashof number is `r sprintf("%7.4e ", Gr())`
+
+With these values the Grashof number is `r sprintf("%g", Gr)`
 
 If the diameter of vertical cylinder is large enough relative to the height, the natural convection correlations for a vertical heated plate can be used.@technical_committee_13_heat_transfer_and_fluid_flow_chapter_2017 Using this correlation is appropriate when $$ D/L > 35/Gr^{1/4} $$
 
-In this case $\frac{D}{L}$ is `r sprintf("%5.4f",diam/height)` and $\frac{35}{Gr^{1/4}}$ is `r sprintf("%5.4f",35/(Gr()^(1/4)))` so treating a hot water cylinder as a vertical plate for natural convection is appropriate.
+In this case $\frac{D}{L}$ is `r sprintf("%5.4f",diam/height)` and $\frac{35}{Gr^{1/4}}$ is `r sprintf("%5.4f",35/(Gr^(1/4)))` so treating a hot water cylinder as a vertical plate for natural convection is appropriate.
 
 #### Prandtl number #
 
@@ -224,7 +211,7 @@ Ra <- function(
 ```
 ```{r}
 # Calculate the current value of Ra
-Ra <- Ra(Gr(),Pr)
+Ra <- Ra(Gr,Pr)
 ```
 
 In these conditions the Rayleigh number is `r sprintf("%5.4e",Ra)`
